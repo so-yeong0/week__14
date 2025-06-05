@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>God save the queen</title>
+  <style>
+
+    @font-face { font-family: 'Splash'; src: url('Thorn Font.ttf') format('truetype'); font-weight: normal; font-style: normal; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+
+    @font-face {
+    font-family: 'Pretendard-Light';
+    src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+}
+
+    html, body { width: 100%; height: 100%; font-family: 'Pretendard-Light', sans-serif; }
+    .fixed-elements { position: fixed; top: 0; left: 0; width: 20%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; z-index: 10; padding: 40px 20px; gap: 20px; }
+    .fixed-elements::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.3); z-index: -1; border-right: 1px solid rgba(255, 255, 255, 0.1); }
+    .cd-player { width: 230px; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; position: relative; box-shadow: 0 40px 500px rgba(0, 0, 0, 50); border-radius: 40px; }
+    .cd-player img:first-child { width: 100%; z-index: 1; display: block; }
+    .cd-disk { position: absolute; top: 35px; left: 37px; width: 155px; height: 155px; border-radius: 50%; object-fit: contain; z-index: 2; animation: none; transform: rotate(0deg); box-shadow: none; }
+
+    .play-btn { width: 60px; height: 60px; background-color: transparent; border: none; cursor: pointer; position: relative; margin-top: 5px; }
+    .play-btn::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 0; height: 0; border-left: 18px solid white; border-top: 12px solid transparent; border-bottom: 12px solid transparent; }
+    .paused .play-btn::before, .paused .play-btn::after { content: ''; position: absolute; top: 16px; width: 10px; height: 28px; background-color: white; border-radius: 2px; }
+    .paused .play-btn::before { top: 30px; left: 20px; border: none;}
+    .paused .play-btn::after { left: 32px; }
+
+    .toggle { margin-top: 0; background: rgba(0, 0, 0, 0.4); padding: 5px; border-radius: 30px; }
+    .toggle input[type="checkbox"] { display: none; }
+    .toggle-label { display: inline-block; width: 120px; height: 50px; border-radius: 25px; position: relative; cursor: pointer; font-size: 0.9rem; font-family: 'Pretendard-Light'; color: #888; text-align: center; line-height: 50px; }
+    .toggle-label::before { content: 'Past'; position: absolute; top: 2px; left: 65px; z-index: 1; transition: left 0.3s; font-size: 0.9rem; }
+    .toggle-label::after { content: ''; width: 44px; height: 44px; background: #444; border-radius: 50%; position: absolute; top: 4.5px; left: 3px; transition: 0.3s; z-index: 2; }
+    #mode-toggle:checked + .toggle-label { color: white; }
+    #mode-toggle:checked + .toggle-label::before { content: 'Present'; top: 2px; left: 13px; font-size: 0.9rem; }
+    #mode-toggle:checked + .toggle-label::after { transform: translateX(70px); background: white; }
+
+    .wrap { width: 80%; margin-left: auto; padding-top: 200px; }
+    .title { font-family: 'Splash', cursive; font-size: 13rem; line-height: 1.1; text-align: left; margin-left: 70px; opacity: 0.7; }
+    .artist { font-family: 'Splash', cursive; font-size: 3rem; text-align: right; margin-top: -20px; padding-right: 10px; }
+    .section { margin-top: 100px; font-size: 1.2rem; line-height: 1.6; }
+    .present-content { display: none; }
+
+    body.past { color: white; }
+    body.present .past-content { display: none; }
+    body.present .present-content { display: block; }
+    body::before { content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-image: url('b-2.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -2; }
+    body.past::after, body.present::after { content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+    body.past::after { background-color: rgba(0, 0, 0, 0.7); }
+    body.present::after { background-color: rgba(255, 255, 255, 0.5); }
+
+    .image-section { margin: 100px 0; text-align: center; }
+    .image-section img { width: 100%; max-width: 300px; height: auto; margin: 0 auto; display: block; }
+    .image-caption { font-family: 'Splash', cursive; font-size: 3.5rem; margin-top: 20px; text-align: center; }
+    .text-left { text-align: left; padding-left: 20px; }
+    .text-right { text-align: right; padding-right: 20px; }
+
+
+    body.past .description-text { background-color: rgba(0, 0, 0, 0.6); color: white; }
+    body.present .description-text { background-color: rgba(255, 255, 255, 0.7); color: black; }
+
+    .description-text { font-family: 'Pretendard-Light', sans-serif; font-size: 0.9rem; line-height: 1.3; padding: 5px 20px 20px; white-space: pre-line; margin: 30px 200px; btransition: background-color 0.3s ease; }
+    .lyrics-section { margin-top: 100px; text-align: center; }
+    .lyrics-section img { width: 100%; height: auto; margin-bottom: 40px; }
+    .lyric-line { font-family: 'Splash', cursive; font-size: 1.5rem; margin-bottom: 5px; }
+    .translation-line { font-family: 'Pretendard-Light'; font-size: 1.2rem; color: #ffffff; margin-bottom: 20px; }
+    footer {width: 100%; text-align: center; padding: 60px 0 80px; font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); position: relative; -index: 2; }
+  </style>
+
+
+</head>
+<body class="past">
+  <div class="fixed-elements">
+    <div class="toggle">
+      <input type="checkbox" id="mode-toggle" onclick="toggleMode()">
+      <label class="toggle-label" for="mode-toggle"></label>
+    </div>
+    <div class="cd-player" id="cd-player">
+      <img src="cdp.png" alt="CD Player">
+      <img class="cd-disk" src="2.png" alt="CD">
+      <button id="play-button" class="play-btn" onclick="toggleAudio()"></button>
+      <audio id="audio">
+        <source src="god.mp3" type="audio/mpeg">
+      </audio>
+    </div>
+  </div>
+
+ 
+
+  <div class="wrap">
+    <div class="title"> God Save<br>the Queen</div>
+  </div>
+
+ <div class="past-content">
+
+      <div class="wrap">
+        <div class="image-section">
+          <img src="f-2.gif" alt="Flag">
+          <div class="image-caption">1977, UK</div>
+        </div>
+      </div>
+
+
+      <div class="wrap">
+
+        <div class="image-section">
+          <img src="2p-1.jpg" alt="Portrait">
+          <div class="image-caption">Sex Pistols</div>
+        </div>
+        <div class="description-text text-left">
+          Sex Pistols는 처음부터 음악을 하려던 사람들은 아니었다.
+        </div>
+        <div class="description-text text-right">
+          1975년, 런던의 한 낡은 옷가게에서 시작된 이 밴드는 불만과 무질서의 결정체였다. 기타를 제대로  <br>
+          잡을 줄도 몰랐고, 보컬은 날을 세운 채 세상을 욕할 줄만 알았다. 하지만 그들은<br>
+          당대 영국 청년들의 분노, 무력감, 그리고 혐오감을 가장 직접적으로 표출한 존재였다.
+        </div>
+        <div class="description-text text-left">
+          밴드의 얼굴이자 리드 보컬인 Johnny Rotten(본명 John Lydon)은 항상 뾰족했고,<br>
+          씹고 뱉듯 가사를 던졌다. 그는 기성 세대와 언론, 왕실과 정치인들 모두를 적으로 돌렸다. 록스타가 되기보단 <br>
+          세상을 망신주고 싶었던 그의 말투와 태도는, 사람들을 불편하게 만들었지만 동시에 카타르시스를 줬다.
+        </div>
+        <div class="description-text text-right">
+          기타리스트 Steve Jones, 드러머 Paul Cook, 그리고 카리스마와 파괴 본능만으로 무장한<br>
+          Sid Vicious는 “밴드”라는 형식을 빌려, 체제 그 자체에 대한 모욕을 퍼부었다.
+        </div>
+        <div class="description-text text-left">
+          Sex Pistols는 예술도 아니고 음악도 아니었다. 그들은 하나의<br>
+          반사회적 퍼포먼스였고, 시대의 병리 현상이었다.
+        </div>
+         <div class="image-section">
+          불과 2년. 단 하나의 앨범. 그리고 해체.
+        </div>
+        <div class="description-text text-right">      
+          하지만 그 짧은 시간 동안, 그들은 영국 왕실을 공개적으로 조롱하고, 언론을 뒤집어엎으며,<br>
+          수많은 청년들에게 이렇게 말했다.
+        </div>
+        <div class="image-section">
+          “너희가 미쳐 있는 게 아니야. 세상이 미친 거야.”
+        </div>
+         <div class="description-text text-left">
+          언론은 그들을 악마처럼 묘사했고, 정부는 그들의 이름을 차트에서 지웠다. 공연은 취소됐고,<br>
+          매장에서는 앨범 판매를 거부했다. 그러나 그들은 멈추지 않았다.<br>
+          결국 Sex Pistols는 펑크의 아이콘이 아니라, 영국 사회가 숨기고 싶어 했던 얼굴 그 자체였다.
+        </div>
+        <div class="description-text text-right">
+          기타리스트 Steve Jones, 드러머 Paul Cook, 그리고 카리스마와 파괴 본능만으로 무장한<br>
+          Sid Vicious는 “밴드”라는 형식을 빌려, 체제 그 자체에 대한 모욕을 퍼부었다.
+        </div>
+        <div class="image-section">
+          그들의 파괴는 끝났고, 밴드는 사라졌지만 그들이 일으킨 균열은 지금도 여전히, 귓가에 울린다.
+        </div>
+      </div>
+
+      <div class="wrap">
+        <div class="image-section">
+          <img src="2s-1.jpg" alt="Strange Fruit - Censorship">
+          <div class="image-caption">Why Censored?</div>
+       </div>
+        <div class="description-text text-left">
+          1970년대 후반, 영국은 망가진 나라였다.
+        </div>
+        <div class="description-text text-right">
+          청년들은 일자리가 없었고, 대학을 나와도 미래가 없었다.<br>
+          거리는 쓰레기로 넘쳐났고, 파업은 일상이었으며, 빈부격차는 점점 벌어지고 있었다.<br>
+          노동계급은 분노했고, 중산층은 불안했으며, 귀족 계층은 그 위에 앉아 침묵하고 있었다.<br>
+          그리고, 그 모든 불균형과 절망의 상징 위에 ‘여왕’이 있었다.
+        </div>
+        <div class="description-text text-left">
+          Sex Pistols는 바로 그 정중하고 고요한 위선에 대고 욕설처럼 음악을 던졌다.
+        </div>
+        <div class="image-section">
+          “God save the Queen. She ain’t no human being. There is no future. In England’s dreaming.”
+        </div>
+        <div class="description-text text-left">
+          그 가사는 단지 왕실에 대한 모욕이 아니었다. <br>
+          그건 한 세대가 전체 체제에 대해 퍼부은 저주였고, <br>
+          한 사회가 스스로를 기만해온 역사에 대한 선언이었다.<br>
+          국가는 깨어졌고, 청년은 희망을 잃었고, 음악은 그 사실을 폭로했다.
+        </div>
+        <div class="description-text text-right">
+          그래서 이 노래는 금지되었다.<br>
+          BBC는 전면 방송을 중단했고, 음반 매장은 판매를 거부했으며,<br>
+          공영 차트는 그 곡이 실질적으로 1위였음에도 불구하고 의도적으로 순위를 조작해 2위에 머물게 했다.
+        </div>
+        <div class="description-text text-left">
+          이 노래가 들리면, 사람들은 더 이상 거짓에 고개를 숙이지 않게 되니까.<br>
+          왕실은 더 이상 신성불가침이 아니고, 애국심은 허울뿐이라는 걸 알게 되니까.<br>
+        </div>
+        <div class="description-text text-right">
+         하지만 아이러니하게도, 이 노래는 그 검열 덕분에 더 멀리 퍼졌다.<br>
+         ‘God Save the Queen’은 영국 역사상 가장 유명한 ‘검열된 노래’가 되었고,<br>
+         동시에 가장 날카로운 ‘진실의 기록’이 되었다.
+        </div>
+      </div>
+
+    <div class="wrap">
+        <div class="lyrics-section">
+          <img src="2s-2.jpg" alt="Strange Fruit - Lyrics">
+          <div class="lyric-line">God save the queen</div>
+          <div class="translation-line">하나님, 여왕을 보호하소서</div>
+
+          <div class="lyric-line">The fascist regime</div>
+          <div class="translation-line">파시스트 정권을 말야</div>
+
+          <div class="lyric-line">They made you a moron</div>
+          <div class="translation-line">그들은 널 멍청이로 만들었지</div>
+
+          <div class="lyric-line">Potential H-bomb</div>
+          <div class="translation-line">잠재적 수소폭탄으로 말이야</div>
+
+          <div class="lyric-line">God save the queen</div>
+          <div class="translation-line">하나님, 여왕을 보호하소서</div>
+
+          <div class="lyric-line">She ain't no human being</div>
+          <div class="translation-line">그녀는 인간이 아니야</div>
+
+          <div class="lyric-line">There is no future</div>
+          <div class="translation-line">영국의 꿈에서</div>
+
+          <div class="lyric-line">In England's dreaming</div>
+          <div class="translation-line">미래란 없다</div>
+
+          <div class="lyric-line">Don't be told what you want</div>
+          <div class="translation-line">네가 원하는 것을 말하지마</div>
+
+          <div class="lyric-line">Don't be told what you need</div>
+          <div class="translation-line">네가 필요한 것을 말하지 마</div>
+
+          <div class="lyric-line">There's no future, no future,</div>
+          <div class="translation-line">미래란 없어, 미래란 없어,</div>
+
+          <div class="lyric-line">FNo future for you</div>
+          <div class="translation-line">너에게 미래란 없다</div>
+
+          <div class="lyric-line">God save the queen</div>
+          <div class="translation-line">하나님, 여왕을 보호하소서</div>
+  
+          <div class="lyric-line">We mean it man</div>
+          <div class="translation-line">이건 진심이야</div>
+
+          <div class="lyric-line">We love our queen</div>
+          <div class="translation-line">우리는 여왕 폐하를 사랑해</div>
+
+          <div class="lyric-line">God saves</div>
+          <div class="translation-line">하나님이시여, 보호하소서</div>
+
+          <div class="lyric-line">God save the queen</div>
+          <div class="translation-line">하나님, 여왕을 보호하소서</div>
+          
+          <div class="lyric-line">Cause tourists are money</div>
+          <div class="translation-line">관광객들은 돈이 되니까 말이야</div>
+
+          <div class="lyric-line">And our figurehead</div>
+          <div class="translation-line">우리의 여왕 폐하는 우리 눈으로 보기에</div>
+          
+          <div class="lyric-line">Is not what she seems</div>
+          <div class="translation-line">보이는 것이 다가 아니야</div>
+
+          <div class="lyric-line">Oh God save history</div>
+          <div class="translation-line">하나님, 역사를 구하소서</div>
+
+          <div class="lyric-line">God save your mad parade</div>
+          <div class="translation-line">하나님, 그대의 정신병같은 행진을 구하소서</div>
+
+          <div class="lyric-line">Oh Lord God have mercy</div>
+          <div class="translation-line">오 하나님은 자비로우시네</div>
+
+          <div class="lyric-line">All crimes are paid</div>
+          <div class="translation-line">모든 범죄는 그 죗값을 치렀지</div>
+
+          <div class="lyric-line">When there's no future</div>
+          <div class="translation-line">미래가 없을 때에는</div>
+
+          <div class="lyric-line">How can there be sin</div>
+          <div class="translation-line">어떻게 죄악이란게 있을 수 있지?</div>
+
+          <div class="lyric-line">We're the flowers in the dustbin</div>
+          <div class="translation-line">우리는 쓰레기통 안에 핀 꽃이야</div>
+
+          <div class="lyric-line">We're the poison in your human machine</div>
+          <div class="translation-line">우리는 네 기계 인간의 독이야</div>
+
+          <div class="lyric-line">We're the future, your future</div>
+          <div class="translation-line">우리가 미래야, 우리가 미래지</div>
+
+          <div class="lyric-line">God save the queen</div>
+          <div class="translation-line">하나님, 여왕을 보호하소서</div>
+
+          <div class="lyric-line">We mean it man</div>
+          <div class="translation-line">이건 진심이야</div>
+
+          <div class="lyric-line">We love our queen</div>
+          <div class="translation-line">우리는 여왕 폐하를 사랑해</div>
+
+          <div class="lyric-line">God saves</div>
+          <div class="translation-line">하나님이시여, 보호하소서</div>
+
+          <div class="lyric-line">God save the queen</div>
+          <div class="translation-line">하나님, 여왕을 보호하소서</div>
+
+          <div class="lyric-line">We mean it man</div>
+          <div class="translation-line">이건 진심이야</div>
+
+          <div class="lyric-line">And there is no future</div>
+          <div class="translation-line">그리고 미래는 없어</div>
+
+          <div class="lyric-line">In England's dreaming</div>
+          <div class="translation-line">영국의 꿈에서</div>
+
+          <div class="lyric-line">No future, no future,</div>
+          <div class="translation-line">미래는 없어, 미래란 없어,</div>
+
+          <div class="lyric-line">No future for you</div>
+          <div class="translation-line">너에게 미래 따위는 없어</div>
+
+          <div class="lyric-line">No future, no future,</div>
+          <div class="translation-line">미래는 없어, 미래란 없어,</div>
+
+          <div class="lyric-line">No future for me</div>
+          <div class="translation-line">나에게도 미래 따위는 없어</div>
+
+          <div class="lyric-line">No future, no future,</div>
+          <div class="translation-line">미래는 없어, 미래란 없어,</div>
+
+          <div class="lyric-line">No future for you</div>
+          <div class="translation-line">너에게 미래 따위는 없어</div>
+
+          <div class="lyric-line">No future, no future,</div>
+          <div class="translation-line">미래는 없어, 미래란 없어,</div>
+
+          <div class="lyric-line">For you</div>
+          <div class="translation-line">너에게 미래 따위는 없어.<br><br><br><br><br><br></div>
+        </div>
+        <img src="2p-2.jpg">
+        <img src="2p-3.jpg">
+      </div>
+  </div>
+
+
+    <div class="present-content">
+      <div class="wrap">
+
+        <div class="image-section">
+           <div class="image-section">
+          <img src="2p-2.jpg" >
+          <div class="image-caption">How It's Remembered</div>
+        </div>
+        <div class="description-text text-left">
+          “God Save the Queen”은 단지 펑크의 상징이 아니라, 예술이 정치가 될 수 있음을 증명한 사건이었다.
+        </div>
+        <div class="description-text text-right">
+          이 곡은 발표된 지 수십 년이 지난 지금까지도 가장 강력한 저항의 노래 중 하나로 꼽힌다.<br>
+          성스러움으로 포장된 권력, 침묵으로 유지된 체제, 꿈을 가장한 절망— <br>
+          Sex Pistols는 그 모든 것에 돌을 던졌고, 그 중심에 이 노래가 있었다.
+        </div>
+        <div class="description-text text-left">
+          당시엔 방송금지와 차트 조작, 공연 취소 등으로 지워졌지만, <br>
+          오히려 그 검열 자체가 이 노래를 영국 대중문화의 아이콘으로 만들었다.
+        </div>
+        <div class="description-text text-right">
+          “God Save the Queen”은 펑크 세대뿐 아니라<br>
+          이후 세대의 예술가, 운동가, 사회 비평가들에게도 영향을 끼쳤다.<br>
+          패션, 광고, 영화, 시위 구호 등 수많은 영역에서 이 노래는<br>
+          반항, 정체성, 그리고 용기의 상징으로 끊임없이 소환되었다.
+        </div>
+        <div class="description-text text-left">
+          심지어 2012년 여왕 즉위 60주년 기념식 때도, 이 곡은 다시 한 번 금지된 역사로서 회자되었다.
+        </div>
+        <div class="description-text text-right">
+         그리고 그 순간, 사람들은 깨달았다. 아무리 시간이 지나도, 음악은 체제를 기억하게 만든다는 것.
+        </div>
+        <div class="description-text text-left">
+          심지어 2012년 여왕 즉위 60주년 기념식 때도, 이 곡은 다시 한 번 금지된 역사로서 회자되었다.
+        </div>
+        <div class="description-text text-center">
+          이 노래는 여전히 불편하지만, 그렇기에 더욱 강렬하게 남아 있다. <br>
+          그것은 “불경한 노래”가 아니라, 지워진 목소리들의 기록이다.
+        </div>
+        
+      </div>
+    </div>
+
+      
+
+
+  <div class="wrap">
+    <footer>
+      © 2025 김소영. 모든 권리 보유.
+    </footer>
+  </div>
+
+
+  <script>
+    let rotation = 0;
+    let speed = 0.05;
+    let raf;
+    let isSpinning = false;
+    function rotateDisk() {
+      const disk = document.querySelector('.cd-disk');
+      rotation += speed;
+      disk.style.transform = `rotate(${rotation}deg)`;
+      if (speed < 10) speed += 0.15;
+      raf = requestAnimationFrame(rotateDisk);
+    }
+    function toggleMode() {
+      const body = document.body;
+      body.classList.toggle('past');
+      body.classList.toggle('present');
+    }
+    function toggleAudio() {
+      const audio = document.getElementById('audio');
+      const cdPlayer = document.getElementById('cd-player');
+      if (!isSpinning) {
+        audio.play();
+        rotation = 0;
+        speed = 0.05;
+        isSpinning = true;
+        rotateDisk();
+        cdPlayer.classList.add('paused');
+      } else {
+        audio.pause();
+        isSpinning = false;
+        cancelAnimationFrame(raf);
+        cdPlayer.classList.remove('paused');
+      }
+    }
+  </script>
+</body>
+</html>

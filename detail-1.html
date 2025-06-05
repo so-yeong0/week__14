@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strange Fruit - Billie Holiday</title>
+  <style>
+
+    @font-face { font-family: 'Splash'; src: url('Splash-Regular.ttf') format('truetype'); font-weight: normal; font-style: normal; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+
+    @font-face {
+    font-family: 'Pretendard-Light';
+    src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+}
+    html, body { width: 100%; height: 100%; font-family: 'Pretendard-Light', sans-serif; }
+    .fixed-elements { position: fixed; top: 0; left: 0; width: 20%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; z-index: 10; padding: 40px 20px; gap: 20px; }
+    .fixed-elements::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.3); z-index: -1; border-right: 1px solid rgba(255, 255, 255, 0.1); }
+    .cd-player { width: 230px; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; position: relative; box-shadow: 0 40px 500px rgba(0, 0, 0, 50); border-radius: 40px; }
+    .cd-player img:first-child { width: 100%; z-index: 1; display: block; }
+    .cd-disk { position: absolute; top: 35px; left: 37px; width: 155px; height: 155px; border-radius: 50%; object-fit: contain; z-index: 2; animation: none; transform: rotate(0deg); box-shadow: none; }
+
+    .play-btn { width: 60px; height: 60px; background-color: transparent; border: none; cursor: pointer; position: relative; margin-top: 5px; }
+    .play-btn::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 0; height: 0; border-left: 18px solid white; border-top: 12px solid transparent; border-bottom: 12px solid transparent; }
+    .paused .play-btn::before, .paused .play-btn::after { content: ''; position: absolute; top: 16px; width: 10px; height: 28px; background-color: white; border-radius: 2px; }
+    .paused .play-btn::before { top: 30px; left: 20px; border: none;}
+    .paused .play-btn::after { left: 32px; }
+
+    .toggle { margin-top: 0; background: rgba(0, 0, 0, 0.4); padding: 5px; border-radius: 30px; }
+    .toggle input[type="checkbox"] { display: none; }
+    .toggle-label { display: inline-block; width: 120px; height: 50px; border-radius: 25px; position: relative; cursor: pointer; font-size: 0.9rem; font-family: 'Pretendard-Light'; color: #888; text-align: center; line-height: 50px; }
+    .toggle-label::before { content: 'Past'; position: absolute; top: 2px; left: 65px; z-index: 1; transition: left 0.3s; font-size: 0.9rem; }
+    .toggle-label::after { content: ''; width: 44px; height: 44px; background: #444; border-radius: 50%; position: absolute; top: 4.5px; left: 3px; transition: 0.3s; z-index: 2; }
+    #mode-toggle:checked + .toggle-label { color: white; }
+    #mode-toggle:checked + .toggle-label::before { content: 'Present'; top: 2px; left: 13px; font-size: 0.9rem; }
+    #mode-toggle:checked + .toggle-label::after { transform: translateX(70px); background: white; }
+
+    .wrap { width: 80%; margin-left: auto; padding-top: 200px; }
+    .title { font-family: 'Splash', cursive; font-size: 15rem; line-height: 1.1; text-align: right; margin-right: 200px; opacity: 0.7; }
+    .artist { font-family: 'Splash', cursive; font-size: 3rem; text-align: right; margin-top: -20px; padding-right: 10px; }
+    .section { margin-top: 100px; font-size: 1.2rem; line-height: 1.6; }
+    .present-content { display: none; }
+
+    body.past { color: white; }
+    body.present .past-content { display: none; }
+    body.present .present-content { display: block; }
+    body::before { content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-image: url('b.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -2; }
+    body.past::after, body.present::after { content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+    body.past::after { background-color: rgba(0, 0, 0, 0.7); }
+    body.present::after { background-color: rgba(255, 255, 255, 0.5); }
+
+    .image-section { margin: 100px 0; text-align: center; }
+    .image-section img { width: 100%; max-width: 300px; height: auto; margin: 0 auto; display: block; }
+    .image-caption { font-family: 'Splash', cursive; font-size: 3.5rem; margin-top: 20px; text-align: center; }
+    .text-left { text-align: left; padding-left: 20px; }
+    .text-right { text-align: right; padding-right: 20px; }
+
+
+    body.past .description-text { background-color: rgba(0, 0, 0, 0.6); color: white; }
+    body.present .description-text { background-color: rgba(255, 255, 255, 0.7); color: black; }
+
+    .description-text { font-family: 'Pretendard-Light', sans-serif; font-size: 0.9rem; line-height: 1.3; padding: 5px 20px 20px; white-space: pre-line; margin: 30px 200px; btransition: background-color 0.3s ease; }
+    .lyrics-section { margin-top: 100px; text-align: center; }
+    .lyrics-section img { width: 100%; height: auto; margin-bottom: 40px; }
+    .lyric-line { font-family: 'Splash', cursive; font-size: 1.5rem; margin-bottom: 5px; }
+    .translation-line { font-family: 'Pretendard-Light'; font-size: 1.2rem; color: #ffffff; margin-bottom: 20px; }
+    footer {width: 100%; text-align: center; padding: 60px 0 80px; font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); position: relative; -index: 2; }
+  </style>
+
+
+</head>
+<body class="past">
+  <div class="fixed-elements">
+    <div class="toggle">
+      <input type="checkbox" id="mode-toggle" onclick="toggleMode()">
+      <label class="toggle-label" for="mode-toggle"></label>
+    </div>
+    <div class="cd-player" id="cd-player">
+      <img src="cdp.png" alt="CD Player">
+      <img class="cd-disk" src="1.png" alt="CD">
+      <button id="play-button" class="play-btn" onclick="toggleAudio()"></button>
+      <audio id="audio">
+        <source src="strange-fruit.mp3" type="audio/mpeg">
+      </audio>
+    </div>
+  </div>
+
+ 
+
+  <div class="wrap">
+    <div class="title">Strange<br>Fruit</div>
+  </div>
+
+ <div class="past-content">
+
+      <div class="wrap">
+        <div class="image-section">
+          <img src="f-1.gif" alt="Flag">
+          <div class="image-caption">1939, America</div>
+        </div>
+      </div>
+
+
+      <div class="wrap">
+
+        <div class="image-section">
+          <img src="p-1.jpg" alt="Portrait">
+          <div class="image-caption">Billie Holiday</div>
+        </div>
+        <div class="description-text text-left">
+          Billie Holiday는 재즈 역사상 가장 고통스럽고도 깊은 목소리를 지닌 인물이다.
+        </div>
+        <div class="description-text text-right">
+          1915년, 슬럼가에서 태어난 그녀는 태어날 당시 아버지가 17세, 어머니가 19세였으며,어머니는 <br>
+          거리의 성매매 종사자였다. 그녀 역시 열 살이 되기도 전에  인종과 성별의 이중 차별 속에서 고통받으며,<br>
+          어린 나이에 창부의 삶을 살아야 했다. 빌리는 두 번의 성폭행을 당했으며, 그 중 한 번은 10살 때<br>
+          백인 남성에게서였지만 오히려 그녀가 불량소녀로 몰려 감호소에 수감되는 현실을 마주했다. 어린<br>
+          시절의 학대, 극빈, 그리고 불의한 사회적 처우 속에서 그녀는 매춘과 감옥 생활을 반복하며<br>
+          살아남았다. 그 와중에도 그녀의 목소리는 스스로의 삶을 증언하는 무기가 되었다. 
+        </div>
+        <div class="description-text text-left">
+          클럽에서 춤 오디션에 떨어진 어느 날, 우연히 부른 노래 하나로 모든 것이 달라졌다. 그녀가<br>
+          노래를 부르자 홀 전체가 숨을 죽였고, 그 순간부터 ‘빌리 홀리데이’는 무대 위에서만큼은 누구보다 우아하고<br>
+          품격 있는 존재가 되었다. ‘Lady Day’라는 별명은 무대에서 치자꽃을 머리에 꽂고 노래하던 그녀의 상징이었다.
+        </div>
+        <div class="description-text text-right">
+          하지만 그녀의 삶은 결코 평탄하지 않았다. 세 번의 결혼은 모두 실패로 끝났고, 마약과 알코올 중독은<br>
+          그녀의 정신과 육체를 갈아먹었다. 듀크 엘링턴, 마일스 데이비스 같은 전설들이 그녀를 도왔지만,<br>
+          인종차별과 사회적 낙인은 그녀를 끝내 벗어나지 못하게 했다. 마약 중독 말기로 병원에 실려 갔을 때<br>
+          아무도 그녀를 알아보지 못할 정도였고, 진료 기록에는 “치료 방법 없음”이라 적혀 있었다.
+        </div>
+        <div class="description-text text-left">
+          그녀의 대표곡인 ‘Strange Fruit’은 이러한 생의 응축된 분노와 비통함을 담은 노래였다.<br>
+          흑인을 린치하는 장면을 은유적으로 표현한 이 곡은, 백인 중심의 미국 사회에서 금기시되었고,<br>
+          그녀는 FBI의 감시 속에서도 이 노래를 부르는 것을 멈추지 않았다.<br>
+          그녀에게 ‘Strange Fruit’은 단지 노래가 아니라 저항이고, 증언이었다.
+        </div>
+        <div class="description-text text-right">      
+          오늘날까지도 많은 사람들은 그녀의 망가진 목소리 속에서 오히려 더 진한 감정을 느낀다. 그녀의<br>
+          노래는 단순한 음악이 아닌, 한 사람의 삶과 그 시대의 기록이며, 죽음을 견딘 목소리였다.<br>
+          그녀는 무대 위에서는 레이디였지만, 무대 밖에서는 처절히 버림받은 사람이었다.
+        </div>
+        <div class="image-section">
+          그런 그녀가 죽었을 때, 지인들은 이렇게 말했다.<br><br>
+          “이제야 그녀가 진짜로 행복해졌을지도 몰라.”
+        </div>
+      </div>
+
+      <div class="wrap">
+        <div class="image-section">
+          <img src="s-1.jpg" alt="Strange Fruit - Censorship">
+          <div class="image-caption">Why Censored?</div>
+       </div>
+        <div class="description-text text-left">
+          이 곡의 제목인 Strange Fruit(기이한 열매)는 섬뜩하게도 남부의 포플러 나무에<br>
+          목이 매달린 흑인의 시신을 은유하는 표현이다. 당시 미국 남부에서는 인종차별이 극에 달해,흑인들이 백인에게<br>
+          린치를 당하고 나무에 매달리는 일이 빈번했다. 이 곡은 그 잔혹한 현실을 은유적이고 시적으로 고발한 노래다.
+        </div>
+        <div class="description-text text-right">
+          곡의 가사를 쓴 이는 뉴욕 출신 백인 시인 Abel Meeropol로, 루이스 앨런(Lewis Allan)이라는 <br>
+          필명으로 이 시를 발표했다. 그는 한 장의 린치 사진에서 충격을 받아 이 시를 썼고,후에 곡을 <br>
+          붙여 아내와 흑인 가수 로러 던컨과 함께 메디슨 스퀘어 가든에서 초연했다.
+        </div>
+        <div class="description-text text-left">
+          그러나 이 곡이 진정으로 세계에 울려 퍼진 계기는 Billie Holiday의 목소리를 통해서였다. Billie는 <br>
+          1939년, 흑인이라는 이유로 적절한 치료를 받지 못한 채 폐렴으로 사망한 아버지의 죽음을 계기로 이 곡을 <br>
+          부르기로 결심했다. 그녀에게 이 노래는 단순한 발언이 아닌, 존재 자체의 저항이자 분노의 표현이었다.
+        </div>
+        <div class="description-text text-right">
+          곡은 발표 직후부터 극심한 논란에 휘말렸다. 대부분의 라디오 방송국은 이 곡을 금지곡으로 지정했고,<br>
+          Billie Holiday는 FBI의 감시 대상이 되었다. 공연장에서조차 이 곡을 부르지 못하게 압박받았고,그녀는 <br>
+          이 노래를 부를 때 조명을 모두 끄고 단 하나의 스포트라이트 아래에서 노래를 부른 뒤 바로 무대에서 내려갔다.
+        </div>
+        <div class="description-text text-center">
+          ‘Strange Fruit’는 단지 그냥 하나의 노래 아닌, 한 시대를 고발하는 선언문이었다.<br>
+          이 곡이 검열된 이유는 단지 표현이 거칠어서가 아니라,<br>
+          너무나도 정확하게 미국 사회의 부끄러운 얼굴을 찔렀기 때문이었다.
+        </div>
+      </div>
+
+    <div class="wrap">
+        <div class="lyrics-section">
+          <img src="s-2.jpg" alt="Strange Fruit - Lyrics">
+          <div class="lyric-line">Southern trees bear a strange fruit</div>
+          <div class="translation-line">남부의 나무엔 이상한 열매가 맺히지요</div>
+
+          <div class="lyric-line">Blood on the leaves and blood at the root</div>
+          <div class="translation-line">잎에도 뿌리에도 온통 피범벅</div>
+
+          <div class="lyric-line">Black body swinging in the Southern breeze</div>
+          <div class="translation-line">검은 몸뚱이가 남부의 산들바람에 흔들리죠</div>
+
+          <div class="lyric-line">Strange fruit hanging from the poplar trees</div>
+          <div class="translation-line">포플러 나무에 이상한 열매가 맺혔답니다</div>
+
+          <div class="lyric-line">Pastoral scene of the gallant South</div>
+          <div class="translation-line">용맹의 고장, 남부의 목가적인 풍경 아래</div>
+
+          <div class="lyric-line">The bulging eyes and the twisted mouth</div>
+          <div class="translation-line">튀어나온 눈과 비틀어진 입술</div>
+
+          <div class="lyric-line">Scent of magnolia sweet and fresh</div>
+          <div class="translation-line">달콤하고 신선한 목련꽃의 냄새와</div>
+
+          <div class="lyric-line">And the sudden smell of burning flesh</div>
+          <div class="translation-line">불타버린 살점의 냄새까지</div>
+
+          <div class="lyric-line">Here is a fruit for the crows to pluck</div>
+          <div class="translation-line">까마귀가 파먹는 열매가 맺혔어요</div>
+
+          <div class="lyric-line">For the rain to gather, for the wind to suck</div>
+          <div class="translation-line">비에 맞고 바람에 시들리며</div>
+
+          <div class="lyric-line">For the sun to rot, for a tree to drop</div>
+          <div class="translation-line">햇볕에 썩어서 결국 나무에서 떨어져 버리는</div>
+
+          <div class="lyric-line">Here is a strange and bitter crop</div>
+          <div class="translation-line">참으로 이상하고 씁쓸한 과실이랍니다</div>
+        </div>
+      </div>
+  </div>
+
+    <div class="present-content">
+      <div class="wrap">
+
+        <div class="image-section">
+           <div class="image-section">
+          <img src="p-2.jpg" >
+          <div class="image-caption">How It's Remembered</div>
+        </div>
+        <div class="description-text text-left">
+          ‘Strange Fruit’는 발표 이후 수십 년이 지난 지금까지도 끊임없이 언급되고 커버되며, 그 사회적 의미를 이어오고 있다.
+        </div>
+        <div class="description-text text-right">
+          1944년, 작가 릴리언 스미스는 이 곡에서 모티브를 얻어 동명의 소설 『Strange Fruit』을 출간했고,<br>
+          이는 곧 베스트셀러가 되었다. 같은 해, 빌리 할러데이는 이 곡으로 에스콰이어 <br>
+          재즈 보컬상을 수상하며 사회적 반향과 예술적 성취를 동시에 인정받았다.
+        </div>
+        <div class="description-text text-left">
+          이후 ‘Strange Fruit’는 다양한 방식으로 재조명되었다. 1999년 <br>
+          타임지는 이 곡을 ‘20세기 최고의 노래’로 선정했고, 2003년에는 미국 의회도서관에<br>
+          등재되며 미국 역사 속 가장 중요한 녹음물 중 하나로 보존되었다.
+        </div>
+        <div class="description-text text-right">
+          음악사적 평가 또한 높다. 롤링 스톤 선정 ‘500대 명곡’(2021년 개정판)에서는 21위, 어클레임드 뮤직 선정<br>
+         ‘올타임 명곡’ 리스트에서는 35위에 오르며, 이는 보컬 재즈 곡 중 역대 최고 순위로 기록되었다.
+        </div>
+        <div class="description-text text-left">
+          이 곡은 수많은 후배 뮤지션들에게 영향을 끼쳤다. 니나 시몬, 제프 버클리, 레네이 머리 등<br>
+          여러 세대의 아티스트들이 이 곡을 커버했고, 그들 각자의 방식으로 다시 해석하며 역사적 기억을 현재의 언어로 되살려냈다.
+        </div>
+        <div class="description-text text-center">
+          오늘날 ‘Strange Fruit’는 단순한 곡이 아니다.  그것은 한 시대의 고발이며, 지금도 <br>
+          이어지는 차별과 폭력에 대한 경고이고, 음악이 세상을 바꿀 수 있음을 증명한 불멸의 선언문이다.
+        </div>
+      </div>
+    </div>
+
+      
+  <div class="wrap">
+    <footer>
+      © 2025 김소영. 모든 권리 보유.
+    </footer>
+  </div>
+
+
+  <script>
+    let rotation = 0;
+    let speed = 0.05;
+    let raf;
+    let isSpinning = false;
+    function rotateDisk() {
+      const disk = document.querySelector('.cd-disk');
+      rotation += speed;
+      disk.style.transform = `rotate(${rotation}deg)`;
+      if (speed < 10) speed += 0.15;
+      raf = requestAnimationFrame(rotateDisk);
+    }
+    function toggleMode() {
+      const body = document.body;
+      body.classList.toggle('past');
+      body.classList.toggle('present');
+    }
+    function toggleAudio() {
+      const audio = document.getElementById('audio');
+      const cdPlayer = document.getElementById('cd-player');
+      if (!isSpinning) {
+        audio.play();
+        rotation = 0;
+        speed = 0.05;
+        isSpinning = true;
+        rotateDisk();
+        cdPlayer.classList.add('paused');
+      } else {
+        audio.pause();
+        isSpinning = false;
+        cancelAnimationFrame(raf);
+        cdPlayer.classList.remove('paused');
+      }
+    }
+  </script>
+</body>
+</html>

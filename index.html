@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>금지곡 경고</title>
+  <style>
+    html, body { margin: 0, padding: 0, width: 100%, height: 100%, overflow: hidden; font-family: sans-serif; }
+    body { background: url('https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbG13anI5aHZ5ZWU2d3o3M28wNW55cTQ5OHdweGMybnhyc3d2MjFlYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Q61LJj43H48z1FIK4X/giphy.gif') no-repeat center center fixed; background-size: cover; position: relative; }
+
+    .error-img { position: absolute; width: 320px; opacity: 0; animation: fadeIn 0.1s ease-out forwards; }
+    @keyframes fadeIn { to { opacity: 1; } }
+
+    .shake { animation: fadeIn 0.1s ease-out forwards, shake 0.3s infinite; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-4px); }
+    }
+
+    .click-area { position: absolute; bottom: 57px; right: 57px; width: 220px; height: 63px; cursor: pointer; }
+    .click-area:hover { background-color: rgba(100, 100, 100, 0.15); }
+  </style>
+</head>
+<body>
+
+  <!-- 에러창들 -->
+  <img src="error.png" class="error-img" style="top: 20px; left: 120px; z-index: 1; animation-delay: 1.2s;">
+  <img src="error.png" class="error-img" style="top: 70px; left: 170px; z-index: 2; animation-delay: 1.3s;">
+  <img src="error.png" class="error-img" style="top: 120px; left: 220px; z-index: 3; animation-delay: 1.4s;">
+  <img src="error.png" class="error-img" style="top: 170px; left: 270px; z-index: 4; animation-delay: 1.5s;">
+  <img src="error.png" class="error-img" style="top: 220px; left: 320px; z-index: 5; animation-delay: 1.6s;">
+  <img src="error.png" class="error-img" style="top: 270px; left: 370px; z-index: 6; animation-delay: 1.7s;">
+  <img src="error.png" class="error-img" style="top: 320px; left: 420px; z-index: 7; animation-delay: 1.8s;">
+  <img src="error.png" class="error-img" style="top: 270px; left: 540px; z-index: 8; animation-delay: 1.9s;">
+  <img src="error.png" class="error-img" style="top: 220px; left: 640px; z-index: 9; animation-delay: 2.0s;">
+  <img src="error.png" class="error-img" style="top: 170px; left: 740px; z-index: 10; animation-delay: 2.1s;">
+
+  <!-- 마지막 에러창 -->
+  <div class="error-img shake" style="top: 120px; left: 840px; z-index: 11; animation-delay: 2.2s;">
+    <img src="error.png" style="width: 100%;">
+    <a href="main.html" class="click-area"></a>
+  </div>
+
+</body>
+</html>

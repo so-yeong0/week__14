@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Imagine</title>
+  <style>
+
+    @font-face { font-family: 'Splash'; src: url('Dream.ttf') format('truetype'); font-weight: normal; font-style: normal; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+
+    @font-face {
+    font-family: 'Pretendard-Light';
+    src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+}
+
+    html, body { width: 100%; height: 100%; font-family: 'Pretendard-Light', sans-serif; }
+
+    .fixed-elements { position: fixed; top: 0; left: 0; width: 20%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; z-index: 10; padding: 40px 20px; gap: 20px; }
+    .fixed-elements::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.3); z-index: -1; border-right: 1px solid rgba(255, 255, 255, 0.1); }
+    .cd-player { width: 230px; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; position: relative; box-shadow: 0 40px 500px rgba(0, 0, 0, 50); border-radius: 40px; }
+    .cd-player img:first-child { width: 100%; z-index: 1; display: block; }
+    .cd-disk { position: absolute; top: 35px; left: 37px; width: 155px; height: 155px; border-radius: 50%; object-fit: contain; z-index: 2; animation: none; transform: rotate(0deg); box-shadow: none; }
+
+    .play-btn { width: 60px; height: 60px; background-color: transparent; border: none; cursor: pointer; position: relative; margin-top: 5px; }
+    .play-btn::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 0; height: 0; border-left: 18px solid white; border-top: 12px solid transparent; border-bottom: 12px solid transparent; }
+    .paused .play-btn::before, .paused .play-btn::after { content: ''; position: absolute; top: 16px; width: 10px; height: 28px; background-color: white; border-radius: 2px; }
+    .paused .play-btn::before { top: 30px; left: 20px; border: none;}
+    .paused .play-btn::after { left: 32px; }
+
+    .toggle { margin-top: 0; background: rgba(0, 0, 0, 0.4); padding: 5px; border-radius: 30px; }
+    .toggle input[type="checkbox"] { display: none; }
+    .toggle-label { display: inline-block; width: 120px; height: 50px; border-radius: 25px; position: relative; cursor: pointer; font-size: 0.9rem; font-family: 'Pretendard-Light'; color: #888; text-align: center; line-height: 50px; }
+    .toggle-label::before { content: 'Past'; position: absolute; top: 2px; left: 65px; z-index: 1; transition: left 0.3s; font-size: 0.9rem; }
+    .toggle-label::after { content: ''; width: 44px; height: 44px; background: #444; border-radius: 50%; position: absolute; top: 4.5px; left: 3px; transition: 0.3s; z-index: 2; }
+    #mode-toggle:checked + .toggle-label { color: white; }
+    #mode-toggle:checked + .toggle-label::before { content: 'Present'; top: 2px; left: 13px; font-size: 0.9rem; }
+    #mode-toggle:checked + .toggle-label::after { transform: translateX(70px); background: white; }
+
+    .wrap { width: 80%; margin-left: auto; padding-top: 200px; }
+    .title { font-family: 'Splash', cursive; font-size: 17rem; line-height: 1.1; text-align: left; margin-left: 100px; opacity: 0.9; }
+    .artist { font-family: 'Splash', cursive; font-size: 3rem; text-align: right; margin-top: -20px; padding-right: 10px; }
+    .section { margin-top: 100px; font-size: 1.2rem; line-height: 1.6; }
+    .present-content { display: none; }
+
+    body.past { color: white; }
+    body.present .past-content { display: none; }
+    body.present .present-content { display: block; }
+    body::before { content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-image: url('b-3.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -2; }
+    body.past::after, body.present::after { content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+    body.past::after { background-color: rgba(0, 0, 0, 0.7); }
+    body.present::after { background-color: rgba(255, 255, 255, 0.5); }
+
+    .image-section { margin: 100px 0; text-align: center; }
+    .image-section img { width: 100%; max-width: 300px; height: auto; margin: 0 auto; display: block; }
+    .image-caption { font-family: 'Splash', cursive; font-size: 3.5rem; margin-top: 20px; text-align: center; }
+    .text-left { text-align: left; padding-left: 20px; }
+    .text-right { text-align: right; padding-right: 20px; }
+
+
+    body.past .description-text { background-color: rgba(0, 0, 0, 0.6); color: white; }
+    body.present .description-text { background-color: rgba(255, 255, 255, 0.7); color: black; }
+
+    .description-text { font-family: 'Pretendard-Light', sans-serif; font-size: 0.9rem; line-height: 1.3; padding: 5px 20px 20px; white-space: pre-line; margin: 30px 200px; btransition: background-color 0.3s ease; }
+    .lyrics-section { margin-top: 100px; text-align: center; }
+    .lyrics-section img { width: 100%; height: auto; margin-bottom: 40px; }
+    .lyric-line { font-family: 'Splash', cursive; font-size: 1.5rem; margin-bottom: 5px; }
+    .translation-line { font-family: 'Pretendard-Light'; font-size: 1.2rem; color: #ffffff; margin-bottom: 20px; }
+
+    footer {width: 100%; text-align: center; padding: 60px 0 80px; font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); position: relative; -index: 2; }
+
+
+  </style>
+
+
+</head>
+<body class="past">
+  <div class="fixed-elements">
+    <div class="toggle">
+      <input type="checkbox" id="mode-toggle" onclick="toggleMode()">
+      <label class="toggle-label" for="mode-toggle"></label>
+    </div>
+    <div class="cd-player" id="cd-player">
+      <img src="cdp.png" alt="CD Player">
+      <img class="cd-disk" src="3.png" alt="CD">
+      <button id="play-button" class="play-btn" onclick="toggleAudio()"></button>
+      <audio id="audio">
+        <source src="Imagine.mp3" type="audio/mpeg">
+      </audio>
+    </div>
+  </div>
+
+ 
+
+  <div class="wrap">
+    <div class="title"> Imagine </div>
+  </div>
+
+ <div class="past-content">
+
+      <div class="wrap">
+        <div class="image-section">
+          <img src="f-3.gif" alt="Flag">
+          <div class="image-caption">1971, America</div>
+        </div>
+      </div>
+
+
+      <div class="wrap">
+
+        <div class="image-section">
+          <img src="3p-1.jpg" alt="Portrait">
+          <div class="image-caption">John Lennon</div>
+        </div>
+          <div class="description-text text-left">
+            John Lennon은 사랑과 분노, 평화와 상처, 모순 속에서 예술을 외친 사람이었다.
+          </div>
+          <div class="description-text text-right">
+            그는 리버풀의 가난한 가정에서 태어났고, 어릴 적부터 가정의 붕괴와 외로움을 겪으며 자랐다.<br>
+            어머니는 일찍 세상을 떠났고, 아버지는 부재했다.<br>
+            그는 늘 자기 안의 결핍과 싸워야 했고, 그 공허함은 음악으로 표현되기 시작했다.
+          </div>
+          <div class="description-text text-left">
+            그는 Beatles로 세계 정상에 올랐지만, 그곳에서 그는 점점 자신을 잃어갔다.<br>
+            광적인 팬들, 끝없는 스케줄, 그리고 “롤 모델”이 되어야 한다는 사회적 압박은 그를 예민하고 거칠게 만들었고,<br>
+            동료들과의 관계도 점점 무너져 갔다.
+          </div>
+          <div class="description-text text-right">
+            그는 불륜, 마약, 폭력성, 그리고 고독 속에서 흔들리는 인간이었지만,<br>
+            동시에 그 누구보다 자기 자신을 들여다보려 했던 예술가였다.
+          </div>
+          <div class="description-text text-left">
+            그런 그가 요코 오노를 만나면서부터,<br>
+            점점 세상의 틀에서 벗어나 예술, 철학, 정치, 이상주의라는 새로운 언어로 세상과 소통하기 시작했다.
+          </div>
+          <div class="description-text text-right">
+            그들의 사랑은 당시 언론에선 “위험하고 괴이한 결합”이라 불렸지만,<br>
+            존은 요코와 함께 세상과 단절되는 대신 세상을 향해 정면으로 말하는 법을 택했다.
+          </div>
+          <div class="description-text text-left">
+            “Imagine”은 그런 존 레논의 전환점이다.<br>
+            그가 믿었던 것들-경계 없는 세계, 소유 없는 삶, 신 없는 평화-는 현실과 어긋났고,<br>
+            그래서 더욱 간절한 상상이 되었다.
+          </div>
+          <div class="description-text text-right">
+            그는 1980년, 뉴욕 거리에서 총격에 쓰러졌지만 그의 노래는 여전히 살아 있다.<br>
+            그가 꿈꿨던 세계는 오지 않았지만, 그의 목소리는 우리에게 계속 묻는다.
+          </div>
+          <div class="image-section">
+            “당신은 그런 세상을 상상할 수 있는가?”
+          </div>
+      </div>
+
+      <div class="wrap">
+        <div class="image-section">
+          <img src="3s-1.jpg" alt="Strange Fruit - Censorship">
+          <div class="image-caption">Why Censored?</div>
+       </div>
+        <div class="description-text text-left">
+          “Imagine”은 평화를 노래하기에 더 강인한 노래였다.
+        </div>
+        <div class="description-text text-right">
+          이 곡은 총도 없고 욕도 없었다.<br>
+          그저 피아노 한 대와 부드러운 목소리로,<br>
+          세상의 질서를 조용히 해체했다.
+        </div>
+        <div class="description-text text-left">
+          “Imagine there’s no heaven” - 종교를 부정했고,<br>
+          “Imagine there’s no countries” - 국가와 국경을 부정했고,<br>
+          “Imagine no possessions” - 사유재산과 자본주의를 부정했다.<br>
+          기득권에게 그것은 아름다운 상상이 아니라, <strong>체제를 향한 정중한 파괴</strong>였다.
+        </div>
+        <div class="description-text text-right">
+          이 노래는 기독교 보수층으로부터 <strong>신성모독</strong>이라 비난받았고,<br>
+          공산주의적 메시지를 담고 있다며 일부 국가에서는 <strong>공영방송에서 제외</strong>되거나 <strong>공연 불허</strong>되기도 했다.<br>
+          특히 미국 내에서는 <strong>반전 운동과 맞물려 정치적 상징</strong>이 되었고,<br>
+          공화당 계열 정치인들과 보수 언론은 이 곡을 “가짜 평화주의자의 망상”이라 공격했다.
+        </div>
+        <div class="description-text text-left">
+          존 레논은 말보다 상상으로 설득했고,<br>
+          바로 그 상상이 권력자들에게는 가장 불편한 것이었다.<br>
+          “Imagine”은 총보다 더 깊이 박히는 한 문장이었다.<br>
+          그래서 검열당했고, 그래서 지금도 금지되길 원하는 사람들은 있다.
+        </div>
+        <div class="image-section">
+          하지만 그 조용한 상상은,<br><br>
+          전 세계 사람들의 마음에 반전과 자유의 언어로 영원히 남게 되었다.
+        </div>
+      </div>
+
+    <div class="wrap">
+        <div class="lyrics-section">
+          <img src="3s-2.jpg" alt="Strange Fruit - Lyrics">
+          <div class="lyric-line">Imagine there's no heaven</div>
+          <div class="translation-line">천국이 없다고 상상해봐요</div>
+
+          <div class="lyric-line">It's easy if you try</div>
+          <div class="translation-line">별 거 아닐거에요</div>
+
+          <div class="lyric-line">No hell below us</div>
+          <div class="translation-line">우리 밑에는 지옥이 없고</div>
+
+          <div class="lyric-line">Above us only sky</div>
+          <div class="translation-line">우리 위에는 하늘만이 있어요</div>
+
+          <div class="lyric-line">Imagine all the people</div>
+          <div class="translation-line">상상해 봐요 세상 모든 사람들이</div>
+
+          <div class="lyric-line">Living for today</div>
+          <div class="translation-line">오늘을 위해 살아가는 모습을</div>
+
+          <div class="lyric-line">Imagine there's no countries</div>
+          <div class="translation-line">국가가 없다고 상상해봐요</div>
+
+          <div class="lyric-line">It isn't hard to do</div>
+          <div class="translation-line">어려운 일이 아니에요</div>
+
+          <div class="lyric-line">Nothing to kill or die for</div>
+          <div class="translation-line">죽고 죽일 필요가 없고</div>
+
+          <div class="lyric-line">And no religion too</div>
+          <div class="translation-line">종교도 없을 거에요</div>
+
+          <div class="lyric-line">Imagine all the people</div>
+          <div class="translation-line">상상해봐요 모든 사람들이</div>
+
+          <div class="lyric-line">Living life in peace</div>
+          <div class="translation-line">평화 속에서 살아가는 모습을</div>
+
+          <div class="lyric-line">You may say I'm a dreamer</div>
+          <div class="translation-line">당신은 저를 몽상가라고 하겠지만</div>
+
+          <div class="lyric-line">But I'm not the only one</div>
+          <div class="translation-line">저는 혼자가 아니랍니다</div>
+
+          <div class="lyric-line">I hope some day you'll join us</div>
+          <div class="translation-line">당신이 우리와 함께하기를 바라요</div>
+
+          <div class="lyric-line">And the world will be as one</div>
+          <div class="translation-line">그렇다면 세상은 하나가 될 거예요</div>
+
+          <div class="lyric-line">Imagine no possessions</div>
+          <div class="translation-line">사유 재산이 없다고 상상해봐요</div>
+
+          <div class="lyric-line">I wonder if you can</div>
+          <div class="translation-line">당신이 할 수 있을지 궁금해요</div>
+
+          <div class="lyric-line">No need for greed or hunger</div>
+          <div class="translation-line">욕심 부릴 필요도 굶주릴 필요도 없어요</div>
+
+          <div class="lyric-line">A brotherhood of man</div>
+          <div class="translation-line">인류애만이 있을 뿐이에요</div>
+
+          <div class="lyric-line">Imagine all the people</div>
+          <div class="translation-line">상상해봐요 세상 모든 사람들이</div>
+
+          <div class="lyric-line">Sharing all the world</div>
+          <div class="translation-line">나누며 살아가는 모습을</div>
+
+          <div class="lyric-line">You may say I'm a dreamer</div>
+          <div class="translation-line">당신은 저를 몽상가라고 하겠지만</div>
+
+          <div class="lyric-line">But I'm not the only one</div>
+          <div class="translation-line">저는 혼자가 아니랍니다</div>
+
+          <div class="lyric-line">I hope some day you'll join us</div>
+          <div class="translation-line">당신이 우리와 함께하기를 바라요</div>
+
+          <div class="lyric-line">And the world will live as one</div>
+          <div class="translation-line">그렇다면 하나된 세상에서 살아갈 거에요<br><br><br><br><br><br></div>
+        </div>
+        <img src="33.jpg">
+        <img src="3p-3.jpg">
+        <img src="3p-4.jpg">
+      </div>
+  </div>
+
+
+    <div class="present-content">
+      <div class="wrap">
+
+        <div class="image-section">
+      
+          <img src="3p-2.jpg" >
+          <div class="image-caption">How It's Remembered</div>
+     
+        <div class="description-text text-left">
+          “Imagine”은 단순한 노래가 아니라, 인류가 아직 포기하지 않은 희망의 목소리다.
+        </div>
+        <div class="description-text text-right">
+          발매된 지 수십 년이 지났지만,<br>
+          이 곡은 여전히 전쟁터에서, 시위 현장에서, 추모식과 평화 콘서트에서 연주된다.<br>
+          John Lennon의 목소리는 분노하지 않고 속삭이지만,<br>
+          그 안에 담긴 상상은 그 무엇보다 강렬하다.
+        </div>
+        <div class="description-text text-left">
+          “Imagine”은 세계가 가장 혼란스러울 때마다 되살아났다.<br>
+          9·11 테러 이후, 우크라이나 전쟁, 기후 위기 시위 현장, 그리고 코로나 팬데믹 동안…<br>
+          사람들은 존 레논의 목소리를 통해, 다시 한 번 ‘인간다운 세상’을 떠올렸다.
+        </div>
+        <div class="description-text text-right">
+          많은 이들이 “불가능한 이상”이라며 이 곡을 비웃었지만,<br>
+          오히려 그 이상이 있었기에, 우리는 아직 상상할 수 있다.
+        </div>
+        <div class="image-section">
+          “종교 없는 세상, 국경 없는 세상, 소유 없는 세상.”
+        </div>
+        <div class="description-text text-left">
+          존 레논은 이 곡을 통해 미래를 예측하지 않았다.
+          그는 단지, 우리가 어떤 세상을 꿈꿀 수 있는지를 물었을 뿐이다.
+        </div>
+        <div class="image-section">
+          그리고 그 물음은 아직 끝나지 않았다.
+        </div>
+        
+      </div>
+    </div>
+
+      
+
+
+  <div class="wrap">
+    <footer>
+      © 2025 김소영. 모든 권리 보유.
+    </footer>
+  </div>
+
+
+  <script>
+    let rotation = 0;
+    let speed = 0.05;
+    let raf;
+    let isSpinning = false;
+    function rotateDisk() {
+      const disk = document.querySelector('.cd-disk');
+      rotation += speed;
+      disk.style.transform = `rotate(${rotation}deg)`;
+      if (speed < 10) speed += 0.15;
+      raf = requestAnimationFrame(rotateDisk);
+    }
+    function toggleMode() {
+      const body = document.body;
+      body.classList.toggle('past');
+      body.classList.toggle('present');
+    }
+    function toggleAudio() {
+      const audio = document.getElementById('audio');
+      const cdPlayer = document.getElementById('cd-player');
+      if (!isSpinning) {
+        audio.play();
+        rotation = 0;
+        speed = 0.05;
+        isSpinning = true;
+        rotateDisk();
+        cdPlayer.classList.add('paused');
+      } else {
+        audio.pause();
+        isSpinning = false;
+        cancelAnimationFrame(raf);
+        cdPlayer.classList.remove('paused');
+      }
+    }
+  </script>
+</body>
+</html>
