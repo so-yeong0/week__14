@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Russians </title>
+  <style>
+
+    @font-face { font-family: 'Splash'; src: url('Kim.ttf') format('truetype'); font-weight: normal; font-style: normal; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+
+    @font-face {
+    font-family: 'Pretendard-Light';
+    src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+}
+
+    html, body { width: 100%; height: 100%; font-family: 'Pretendard-Light', sans-serif; }
+
+    .fixed-elements { position: fixed; top: 0; left: 0; width: 20%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; z-index: 10; padding: 40px 20px; gap: 20px; }
+    .fixed-elements::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.3); z-index: -1; border-right: 1px solid rgba(255, 255, 255, 0.1); }
+    .cd-player { width: 230px; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; position: relative; box-shadow: 0 40px 500px rgba(0, 0, 0, 50); border-radius: 40px; }
+    .cd-player img:first-child { width: 100%; z-index: 1; display: block; }
+    .cd-disk { position: absolute; top: 35px; left: 37px; width: 155px; height: 155px; border-radius: 50%; object-fit: contain; z-index: 2; animation: none; transform: rotate(0deg); box-shadow: none; }
+
+    .play-btn { width: 60px; height: 60px; background-color: transparent; border: none; cursor: pointer; position: relative; margin-top: 5px; }
+    .play-btn::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 0; height: 0; border-left: 18px solid white; border-top: 12px solid transparent; border-bottom: 12px solid transparent; }
+    .paused .play-btn::before, .paused .play-btn::after { content: ''; position: absolute; top: 16px; width: 10px; height: 28px; background-color: white; border-radius: 2px; }
+    .paused .play-btn::before { top: 30px; left: 20px; border: none;}
+    .paused .play-btn::after { left: 32px; }
+
+    .toggle { margin-top: 0; background: rgba(0, 0, 0, 0.4); padding: 5px; border-radius: 30px; }
+    .toggle input[type="checkbox"] { display: none; }
+    .toggle-label { display: inline-block; width: 120px; height: 50px; border-radius: 25px; position: relative; cursor: pointer; font-size: 0.9rem; font-family: 'Pretendard-Light'; color: #888; text-align: center; line-height: 50px; }
+    .toggle-label::before { content: 'Past'; position: absolute; top: 2px; left: 65px; z-index: 1; transition: left 0.3s; font-size: 0.9rem; }
+    .toggle-label::after { content: ''; width: 44px; height: 44px; background: #444; border-radius: 50%; position: absolute; top: 4.5px; left: 3px; transition: 0.3s; z-index: 2; }
+    #mode-toggle:checked + .toggle-label { color: white; }
+    #mode-toggle:checked + .toggle-label::before { content: 'Present'; top: 2px; left: 13px; font-size: 0.9rem; }
+    #mode-toggle:checked + .toggle-label::after { transform: translateX(70px); background: white; }
+
+    .wrap { width: 80%; margin-left: auto; padding-top: 200px; }
+    .title { font-family: 'Splash', cursive; font-size: 17rem; line-height: 1.1; text-align: left; margin-left: 100px; opacity: 0.9; }
+    .artist { font-family: 'Splash', cursive; font-size: 3rem; text-align: right; margin-top: -20px; padding-right: 10px; }
+    .section { margin-top: 100px; font-size: 1.2rem; line-height: 1.6; }
+    .present-content { display: none; }
+
+    body.past { color: white; }
+    body.present .past-content { display: none; }
+    body.present .present-content { display: block; }
+    body::before { content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-image: url('b-4.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; z-index: -2; }
+    body.past::after, body.present::after { content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+    body.past::after { background-color: rgba(0, 0, 0, 0.7); }
+    body.present::after { background-color: rgba(255, 255, 255, 0.5); }
+
+    .image-section { margin: 100px 0; text-align: center; }
+    .image-section img { width: 100%; max-width: 300px; height: auto; margin: 0 auto; display: block; }
+    .image-caption { font-family: 'Splash', cursive; font-size: 3.5rem; margin-top: 20px; text-align: center; }
+    .text-left { text-align: left; padding-left: 20px; }
+    .text-right { text-align: right; padding-right: 20px; }
+
+
+    body.past .description-text { background-color: rgba(0, 0, 0, 0.6); color: white; }
+    body.present .description-text { background-color: rgba(255, 255, 255, 0.7); color: black; }
+
+    .description-text { font-family: 'Pretendard-Light', sans-serif; font-size: 0.9rem; line-height: 1.3; padding: 5px 20px 20px; white-space: pre-line; margin: 30px 200px; btransition: background-color 0.3s ease; }
+    .lyrics-section { margin-top: 100px; text-align: center; }
+    .lyrics-section img { width: 100%; height: auto; margin-bottom: 40px; }
+    .lyric-line { font-family: 'Splash', cursive; font-size: 1.5rem; margin-bottom: 5px; }
+    .translation-line { font-family: 'Pretendard-Light'; font-size: 1.2rem; color: #ffffff; margin-bottom: 20px; }
+
+    footer {width: 100%; text-align: center; padding: 60px 0 80px; font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); position: relative; -index: 2; }
+
+
+  </style>
+
+
+</head>
+<body class="past">
+  <div class="fixed-elements">
+    <div class="toggle">
+      <input type="checkbox" id="mode-toggle" onclick="toggleMode()">
+      <label class="toggle-label" for="mode-toggle"></label>
+    </div>
+    <div class="cd-player" id="cd-player">
+      <img src="cdp.png" alt="CD Player">
+      <img class="cd-disk" src="4.png" alt="CD">
+      <button id="play-button" class="play-btn" onclick="toggleAudio()"></button>
+      <audio id="audio">
+        <source src="Russians.mp3" type="audio/mpeg">
+      </audio>
+    </div>
+  </div>
+
+ 
+
+  <div class="wrap">
+    <div class="title"> Russians </div>
+  </div>
+
+ <div class="past-content">
+
+      <div class="wrap">
+        <div class="image-section">
+          <img src="f-4.gif" alt="Flag">
+          <div class="image-caption">1985, UK</div>
+        </div>
+      </div>
+
+
+      <div class="wrap">
+
+        <div class="image-section">
+          <img src="4p-1.jpg" alt="Portrait">
+          <div class="image-caption">Sting</div>
+        </div>
+          <div class="description-text text-left">
+            Sting은 늘 음악을 넘어서려 했던 사람이다.
+          </div>
+          <div class="description-text text-right">
+            그는 록 밴드 ‘The Police’로 전 세계의 청춘을 사로잡은 스타였지만,<br>
+            밴드가 절정에 올랐을 때, 그는 돌연 솔로로 전환했다.<br>
+            그 이유는 단순했다.
+          </div>
+          <div class="image-section">
+            더 말하고 싶은 것이 생겼기 때문이다.
+          </div>
+          <div class="description-text text-left">
+            Sting은 팝스타이자 동시에 철학적 사유자였다.<br>
+            그의 음악은 늘 정치, 전쟁, 사회 정의, 인간성 같은 거대한 질문을 향해 있었다.<br>
+            그리고 그 사유의 정점 중 하나가 바로 “Russians”다.
+          </div>
+          <div class="description-text text-right">
+            그는 냉전의 한가운데서,<br>
+            “우리가 진짜 두려워해야 할 것은 서로가 아니라,<br>
+            사랑을 잃은 세상 아닐까?” 라는 질문을 던졌다.
+          </div>
+          <div class="description-text text-left">
+            Sting은 단지 반전(反戰)을 말하지 않았다.<br>
+            그는 권력과 이념이 만들어낸 추상 대신, 아이를 품은 아버지의 눈빛을 말하고 싶어 했다.
+          </div>
+          <div class="description-text text-right">
+            그에게 ‘적’이란, 언론이 만들어낸 이미지가 아니라<br>
+            사랑하고 두려워하고 살아가는 우리와 같은 인간이었다.
+          </div>
+          <div class="image-section">
+            그의 음악은 감미롭지만 결코 가볍지 않다.<br><br>
+            Sting은 현실을 직시하면서도 희망을 꺾지 않는 예술가,<br><br>
+            그리고 사유하는 팝의 대표적 목소리다.
+          </div>
+      </div>
+
+      <div class="wrap">
+        <div class="image-section">
+          <img src="4s-1.jpg" alt="Strange Fruit - Censorship">
+          <div class="image-caption">Why Censored?</div>
+       </div>
+        <div class="description-text text-left">
+          “Russians”는 냉전의 가장 예민한 순간에 등장한 곡이었다.
+        </div>
+        <div class="description-text text-right">
+          핵전쟁의 공포가 세계를 지배하던 1985년,<br>
+          Sting은 이념도, 국적도 아닌 “사랑”에 대해 노래했다.<br>
+          그는 미국과 소련 모두를 지목하며 말했다.<br>
+          “우리의 아이들이 중요하다면, 너희 아이들도 중요하지 않느냐”고.
+        </div>
+        <div class="description-text text-left">
+          하지만 이 곡은 곧바로 논란의 중심에 섰다.<br>
+          미국 보수 진영은 이 노래를 “공산주의 동조”라며 비판했고,<br>
+          일부 방송국은 곡을 플레이리스트에서 제외하거나 금지했다.
+        </div>
+        <div class="description-text text-right">
+          그들에게 이 노래는 단지 반전에 대한 노래가 아니었다.<br>
+          ‘소련 사람들도 우리처럼 사랑할 줄 안다’는 가사 자체가,<br>
+          미국 중심의 적대 서사에 균열을 내는 위험한 메시지였기 때문이다.
+        </div>
+        <div class="description-text text-left">
+          Sting은 체제의 승패를 논하지 않았다.<br>
+          그는 전쟁이 아닌 사람을 말했고, 공포가 아닌 연민을 선택했다.
+        </div>
+        <div class="image-section">
+          그렇기에 이 노래는 단순한 전쟁에 반대하는 노래가 아니다.<br><br>
+          그것은 서로를 ‘적’으로 만든 세계에 대한 근본적인 물음이었다.
+        </div>
+      </div>
+
+    <div class="wrap">
+        <div class="lyrics-section">
+          <img src="4s-2.jpg" alt="Strange Fruit - Lyrics">
+          <div class="lyric-line">In Europe and America, there's a growing feeling of hysteria</div>
+          <div class="translation-line">유럽과 미국에선 광기가 퍼지고 있어요</div>
+
+          <div class="lyric-line">Conditioned to respond to all the threats</div>
+          <div class="translation-line">우리는 모든 위협에 반응하도록 훈련되어 있죠</div>
+
+          <div class="lyric-line">In the rhetorical speeches of the Soviets</div>
+          <div class="translation-line">소련의 수사적인 연설에 반응하며 말이에요</div>
+
+          <div class="lyric-line">Mr. Khrushchev said, 'We will bury you'</div>
+          <div class="translation-line">후르시초프는 '우리가 너희를 묻어줄 것이다'라고 말했죠</div>
+
+          <div class="lyric-line">I don't subscribe to this point of view</div>
+          <div class="translation-line">저는 그런 시각엔 동의하지 않아요</div>
+
+          <div class="lyric-line">It'd be such an ignorant thing to do</div>
+          <div class="translation-line">그건 너무 무지한 일이니까요</div>
+
+          <div class="lyric-line">If the Russians love their children too</div>
+          <div class="translation-line">만약 러시아인들도 자식을 사랑한다면 말이죠</div>
+
+          <div class="lyric-line">How can I save my little boy from Oppenheimer's deadly toy?</div>
+          <div class="translation-line">어떻게 내 아이를 오펜하이머의 죽음의 장난감에서 구할 수 있을까요?</div>
+
+          <div class="lyric-line">There is no monopoly of common sense</div>
+          <div class="translation-line">상식은 어느 한쪽의 전유물이 아니에요</div>
+
+          <div class="lyric-line">On either side of the political fence</div>
+          <div class="translation-line">정치의 경계 양편 모두에 상식은 존재하죠</div>
+
+          <div class="lyric-line">We share the same biology, regardless of ideology</div>
+          <div class="translation-line">우리는 이념과 무관하게 같은 생물학적 존재예요</div>
+
+          <div class="lyric-line">But what might save us, me and you</div>
+          <div class="translation-line">그러나 우리, 나와 당신을 구할 수 있는 건</div>
+
+          <div class="lyric-line">Is if the Russians love their children too</div>
+          <div class="translation-line">러시아인들도 아이를 사랑한다는 사실일지도 몰라요</div>
+
+          <div class="lyric-line">There is no historical precedent</div>
+          <div class="translation-line">역사에 전례는 없었죠</div>
+
+          <div class="lyric-line">To put the words in the mouth of the president</div>
+          <div class="translation-line">대통령의 입에서 그런 말이 나오게 만들고</div>
+
+          <div class="lyric-line">There's no such thing as a winnable war</div>
+          <div class="translation-line">이길 수 있는 전쟁 같은 건 존재하지 않아요</div>
+
+          <div class="lyric-line">It's a lie we don't believe anymore</div>
+          <div class="translation-line">우린 더 이상 그런 거짓말을 믿지 않아요</div>
+
+          <div class="lyric-line">Mr. Reagan says, 'We will protect you'</div>
+          <div class="translation-line">레이건은 '우리가 당신을 지켜주겠다'고 말했죠</div>
+
+          <div class="lyric-line">I don't subscribe to this point of view</div>
+          <div class="translation-line">전 그런 시각을 지지하지 않아요</div>
+
+          <div class="lyric-line">Believe me when I say to you</div>
+          <div class="translation-line">제가 하는 말을 믿어주세요</div>
+
+          <div class="lyric-line">I hope the Russians love their children too</div>
+          <div class="translation-line">저는 러시아인들도 자식을 사랑하길 바라요<br><br><br><br><br><br></div>
+        </div>
+        <img src="44.jpg">
+        <img src="4p-3.jpg">
+        <img src="4p-4.jpg">
+      </div>
+  </div>
+
+
+    <div class="present-content">
+      <div class="wrap">
+
+        <div class="image-section">
+          <img src="4p-2.jpg" >
+          <div class="image-caption">How It's Remembered</div>
+        </div>
+        <div class="description-text text-left">
+          1985년, “Russians”가 처음 발표되었을 때 사람들은 당혹스러워했다.
+        </div>
+        <div class="description-text text-right">
+          당시 음악계는 냉전 분위기에 순응하거나, 적당히 비껴가는 노래들로 가득했다.<br>
+          그런데 Sting은 러시아를 “두려운 적”이 아니라 “아이를 사랑하는 사람들”로 그렸다.<br>
+          그 단순한 상상은 당시엔 급진적이었다.
+        </div>
+        <div class="description-text text-left">
+          방송국들은 이 노래를 꺼려했고, 정치적인 메시지를 이유로 금지를 논의하기도 했다.<br>
+          하지만 그럼에도 이 곡은 꾸준히 입소문을 탔다.
+        </div>
+        <div class="description-text text-right">
+          전쟁과 이념이 아닌, ‘공감’과 ‘인류애’로 평화를 이야기하는 곡은 많지 않았다.<br>
+          Sting의 부드럽고 간절한 목소리는 전 세계의 청자들에게<br>
+          “우리가 서로를 적으로만 보면 아무도 살아남지 못한다”는 메시지를 전했다.
+        </div>
+        <div class="description-text text-left">
+          시간이 흐르면서 “Russians”는 단지 냉전 시대를 담은 기록이 아니라,<br>
+          오늘날에도 여전히 유효한 질문을 던지는 곡으로 남았다.
+        </div>
+        <div class="description-text text-right">
+          우리가 무언가를 ‘국가’나 ‘이념’으로 규정하기 전에,<br>
+          그곳에도 아이를 품은 부모가 있고, 사랑이 있으며, 상식이 있다는 사실.<br>
+          그것을 잊지 말자는 노래.
+        </div>
+        <div class="image-section">
+          “If the Russians love their children too.”
+        </div>
+        
+      </div>
+    </div>
+
+      
+
+
+  <div class="wrap">
+    <footer>
+      © 2025 김소영. 모든 권리 보유.
+    </footer>
+  </div>
+
+
+  <script>
+    let rotation = 0;
+    let speed = 0.05;
+    let raf;
+    let isSpinning = false;
+    function rotateDisk() {
+      const disk = document.querySelector('.cd-disk');
+      rotation += speed;
+      disk.style.transform = `rotate(${rotation}deg)`;
+      if (speed < 10) speed += 0.15;
+      raf = requestAnimationFrame(rotateDisk);
+    }
+    function toggleMode() {
+      const body = document.body;
+      body.classList.toggle('past');
+      body.classList.toggle('present');
+    }
+    function toggleAudio() {
+      const audio = document.getElementById('audio');
+      const cdPlayer = document.getElementById('cd-player');
+      if (!isSpinning) {
+        audio.play();
+        rotation = 0;
+        speed = 0.05;
+        isSpinning = true;
+        rotateDisk();
+        cdPlayer.classList.add('paused');
+      } else {
+        audio.pause();
+        isSpinning = false;
+        cancelAnimationFrame(raf);
+        cdPlayer.classList.remove('paused');
+      }
+    }
+  </script>
+</body>
+</html>
